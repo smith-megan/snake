@@ -1,56 +1,92 @@
+import pygame
+import time
 import random
-import curses
 
-s = curses.initscr()
-curses.curs_set(0)
-sh, sw = s.getmaxyx()
-w= curses.newwin(sh, sw, 0, 0)
-w.keypad(1)
-w.timeout(100)
+snake_speed=15
 
-snk_x=sw/4
-snk_y=sh/2
+window_x =720
+window_y=480
 
-snake=[[snk_x, snk_x],
-  [snk_y, snk_x-1],
-  [snk_y, snk_x-2]]
+black=pygame.Color(0,0,0)
+white=pygame.Color(255,255,255)
+red=pygame.Color(255,0,0)
+green=pygame.Color(0,255,0)
+blue=pygame.Color(0,0,255)
 
-food=[[sh/2, sw/2]]
-w.addch(food[0], food[1], curses.ACS_PI)
+pygame.init()
 
-key=curses.KEY_RIGHT
+pygame.display.set_caption('Snek')
+game_window=pygame.display.set_mode((window_x,window_y))
+
+fps= pygame.time.Clock()
+
+snake_position=[100,50]
+snake_body=[random.randrange(1, (window_x//10))*10,
+            random.randrange(1, (window_y//10))*10]
+
+fruit_spawn=True
+
+direction='RIGHT'
+change_to=direction
+
+score=0
+
+def show_score(choice, color, font, size):
+  score_font=pygame.font.SysFont(font, size)
+
+  score_surface=score_font.render('Score: '+str(score), True, color)
+
+  score_rect = score_surface.get_rect()
+
+  game_window.blit(score_surface,score_rect)
+
+def game_over(): 
+  my_font=pygame.font.SysFont('times new roman', 50)
+  game_over_surface=my_font.render('Your Score: '+str(score), True, red)
+
+  game_over_rect=game_over_surface.get_rect()
+
+  game_over_rect.midtop=(window_x/2, window_y/4)
+
+  game_window.blit(game_over_surface, game_over_rect)
+  pygame.display.flip()
+
+  time.sleep(2)
+
+  pygame.quit()
+
+  quit()
+
 while True:
-  next_key = w. getch()
-  key= key if next_key == -1 else next_key
 
-  if snake[0][0] in [0, sh] or snake[0][1] in [0, sw] or snake[0][1] in snake[1:]:
-    curses.endwin()
-    quit()
-    
-  new_head=[snake[0][0], snake[0][1]]
+  for event in pygame.event.get():
+    if event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_UP:
+        change_to='UP'
+      if event.key== pygame.K_DOWN:
+        change_to='DOWN'
+      if event.key==pygame.K_LEFT:
+        change_to='LEFT'
+      if event.key==pygame.K_RIGHT:
+        change_to='RIGHT'
+  
+  if direction=='UP':
+    snake_position[1]-=10
+  if direction =='DOWN':
+    snake_position[1]+=10
+  if direction =='LEFT':
+    snake_position[0]-=10
+  if direction=='RIGHT':
+    snake_position[0]+=10
+  
 
-  if key==curses.KEY_DOWN:
-    new_head[0]+=1
-  if key==curses.KEY_UP:
-    new_head[0]-=1
-  if key==curses.KEY_LEFT:
-    new_head[1]-=1
-  if key==curses.KEY_RIGHT:
-    new_head[1]+=1  
+  for pos in snake_body:
+    pygame.draw.rect(game_window, green, 
+                    pygame.Rect(pos[0],pos[1],10,10))
+  # pygame.draw.rect(game_window, white, pygame.Rect())
 
-  snake.insert(0, new_head)
 
-  if snake[0] == food:
-    food=None
-    while food is None:
-      nf = [
-      random.randint(1, sh-1),
-      random.randint(1, sw-1)]
-      food=nf if nf not in snake else None
-    w.addch(food[0], food[1], curses.ACS_PI)
-  else:
-    tail= snake.pop()
-    w.addch(tail[0], tail[1], ' ')
+  show_score(1, white, 'times new roman', 20)
 
-    w.addch(snake[0][0], snake[0][1], curses.ACS_CKBOARD)
-
+  pygame.display.update()
+  fps.tick(snake_speed)
