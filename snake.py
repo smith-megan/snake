@@ -116,10 +116,14 @@ while True:
   pygame.draw.rect(game_window, white, pygame.Rect(fruit_position[0], fruit_position[1],10,10))
 
 
-  if snake_position[0] < 0 or snake_position[0] > window_x-10:
-    snake_position=[100,50]
-  if snake_position[1]<0 or snake_position[1] > window_y-10:
-    snake_position=[100, 50]
+  if snake_position[0] < 0:
+    snake_position[0]=710
+  if snake_position[0] > window_x-10:
+    snake_position[0]=0
+  if snake_position[1]<0:
+    snake_position[1]=470
+  if snake_position[1] > window_y-10:
+    snake_position[1]=0
 
   for block in snake_body[1:]:
     if snake_position[0] == block[0] and snake_position[1]==block[1]:
